@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Captain Dark's Ghost Fleet - Twilight Treasure Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Patrick+Hand&family=Pirata+One&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --ocean-deep: #16243b;
+      --ocean-mid: #253d5e;
+      --ocean-light: #3e6088;
+      --sand-dusk: #e0be84;
+      --ghost-glow: #00ffc4;
+      --lava-red: #ff3838;
+      --gold: #ffd32a;
+      --border-outer: #0f1724;
+      --ink: #111a24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    /* FULL PAGE CENTERING */
+    body {
+      background: radial-gradient(circle at 50% 40%, #151d28 0%, #080b10 100%);
+      font-family: 'Patrick Hand', cursive;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 15px;
+      color: #e0f2fe;
+      overflow-x: hidden;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 960px;
+      margin: auto;
+    }
+
+    /* PIRATE SLOGAN BANNER */
+    .slogan-capsule {
+      background: linear-gradient(90deg, #881337, #b91c1c, #881337);
+      border: 2.5px solid #fda4af;
+      border-radius: 30px;
+      padding: 5px 22px;
+      margin-bottom: 8px;
+      box-shadow: 0 0 20px rgba(225, 29, 72, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: glowSlogan 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes glowSlogan {
+      0% { box-shadow: 0 0 15px rgba(225, 29, 72, 0.3); }
+      100% { box-shadow: 0 0 25px rgba(0, 255, 196, 0.4); }
+    }
+
+    .slogan-text {
+      font-family: 'Bangers', cursive;
+      font-size: 1.25rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 2px 2px 0px #000;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      text-shadow: 
+        3px 3px 0px #7f1d1d,
+        -1.5px -1.5px 0px #000,
+        1.5px -1.5px 0px #000,
+        -1.5px 1.5px 0px #000,
+        0 0 25px rgba(255, 211, 42, 0.4);
+      margin-bottom: 4px;
+    }
+
+    .sub-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: bold;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      padding: 3px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    /* CENTERED POSTER FRAME */
+    .stamp-container {
+      position: relative;
+      background: #0b1118;
+      padding: 14px;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 255, 196, 0.15);
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      border: 2px solid #1e293b;
+    }
+
+    .map-frame {
+      border: 5px solid #1e2e42;
+      border-radius: 10px;
+      position: relative;
+      background: radial-gradient(circle at 45% 45%, var(--ocean-light) 0%, var(--ocean-mid) 50%, var(--ocean-deep) 100%);
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    svg.art-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* ANIMATIONS FOR MAP OBJECTS */
+    .galleon-bob {
+      animation: galleonRock 4s infinite ease-in-out alternate;
+      transform-origin: 180px 240px;
+    }
+
+    @keyframes galleonRock {
+      0% { transform: rotate(-2.5deg) translateY(-5px); }
+      100% { transform: rotate(2.5deg) translateY(5px); }
+    }
+
+    .whale-swim {
+      animation: whaleFloat 5s infinite ease-in-out alternate;
+    }
+
+    @keyframes whaleFloat {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-7px) scale(1.02); }
+    }
+
+    /* FLOATING & BUBBLING LAVA ANIMATIONS */
+    .floating-lava-blob1 {
+      animation: lavaBlobFloat1 2.4s infinite ease-in-out alternate;
+    }
+    .floating-lava-blob2 {
+      animation: lavaBlobFloat2 3.1s infinite ease-in-out alternate;
+    }
+    .floating-lava-stream {
+      animation: lavaStreamPulse 1.8s infinite alternate ease-in-out;
+    }
+
+    @keyframes lavaBlobFloat1 {
+      0% { transform: translateY(0) scale(0.9); opacity: 0.9; }
+      50% { transform: translateY(-16px) scale(1.25); opacity: 1; filter: drop-shadow(0 0 8px #ff4757); }
+      100% { transform: translateY(-30px) scale(0.8); opacity: 0.4; }
+    }
+
+    @keyframes lavaBlobFloat2 {
+      0% { transform: translate(0, 0) scale(1.1); opacity: 0.8; }
+      50% { transform: translate(-8px, -20px) scale(1.3); opacity: 1; filter: drop-shadow(0 0 10px #ffa502); }
+      100% { transform: translate(4px, -36px) scale(0.6); opacity: 0.3; }
+    }
+
+    @keyframes lavaStreamPulse {
+      0% { filter: drop-shadow(0 0 2px #ff4757); }
+      100% { filter: drop-shadow(0 0 12px #ffa502); }
+    }
+
+    /* BUZZARD BEACH RAIN ANIMATION */
+    .rain-layer {
+      stroke: #a5f3fc;
+      stroke-width: 2;
+      stroke-linecap: round;
+      opacity: 0.75;
+      animation: rainFall 0.75s linear infinite;
+    }
+
+    @keyframes rainFall {
+      0% { transform: translate(0, -30px); opacity: 0; }
+      50% { opacity: 0.85; }
+      100% { transform: translate(-15px, 35px); opacity: 0; }
+    }
+
+    .water-ripple {
+      animation: rippleFade 4s infinite alternate ease-in-out;
+    }
+
+    @keyframes rippleFade {
+      0% { opacity: 0.15; }
+      100% { opacity: 0.45; }
+    }
+
+    /* FLOATING GHOST SHIP AVATAR GUIDE */
+    #ghostAvatar {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 25;
+      transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      filter: drop-shadow(0 0 10px var(--ghost-glow));
+    }
+
+    /* 24 ROADMAP CLICKABLE PINS */
+    .waypoint-pin {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2.5px solid #94a3b8;
+      color: #f8fafc;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 20;
+    }
+
+    /* LOCKED STATE */
+    .waypoint-pin.locked {
+      background: #0f172a;
+      border-color: #334155;
+      color: #64748b;
+      cursor: not-allowed;
+      opacity: 0.65;
+      font-size: 0.85rem;
+      box-shadow: none;
+    }
+
+    /* ACTIVE CURRENT STEP */
+    .waypoint-pin.unlocked-current {
+      background: var(--gold);
+      border-color: #000;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 211, 42, 0.9);
+      animation: pulseCurrent 1.4s infinite alternate;
+    }
+
+    @keyframes pulseCurrent {
+      0% { transform: translate(-50%, -50%) scale(1.05); }
+      100% { transform: translate(-50%, -60%) scale(1.28); }
+    }
+
+    /* PREVIOUSLY VISITED */
+    .waypoint-pin.visited {
+      background: #059669;
+      color: #fff;
+      border-color: var(--ghost-glow);
+      box-shadow: 0 0 12px rgba(0, 255, 196, 0.5);
+    }
+
+    .waypoint-pin:not(.locked):hover {
+      transform: translate(-50%, -58%) scale(1.35);
+      z-index: 35;
+    }
+
+    .waypoint-pin.final-spot {
+      width: 46px;
+      height: 46px;
+      background: linear-gradient(135deg, #e11d48, #9f1239);
+      color: #fff;
+      font-size: 1.5rem;
+      border: 3px solid #fff;
+      box-shadow: 0 0 25px #e11d48;
+    }
+
+    /* STORYBOOK POPUP MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 9, 15, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(6px);
+      padding: 15px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .storybook-card {
+      background: #1e293b;
+      border: 4px solid #475569;
+      border-radius: 24px;
+      max-width: 460px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 255, 196, 0.2);
+      animation: popJump 0.25s ease-out;
+      color: #f1f5f9;
+    }
+
+    @keyframes popJump {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .tag-bubble {
+      display: inline-block;
+      background: #e11d48;
+      color: #fff;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem;
+      padding: 4px 18px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 0 #881337;
+    }
+
+    .card-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.7rem;
+      color: #f8fafc;
+      margin-bottom: 12px;
+    }
+
+    .card-clue-box {
+      font-size: 1.25rem;
+      line-height: 1.45;
+      color: #e2e8f0;
+      background: #0f172a;
+      border: 2px dashed #475569;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+      min-height: 80px;
+    }
+
+    .btn-wrap {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn-act {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      border: 2.5px solid #0f172a;
+      padding: 8px 22px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .btn-done { background: #10b981; color: #022c22; box-shadow: 0 3px 0 #047857; }
+    .btn-done:hover { transform: translateY(-2px); }
+
+    .btn-close { background: #f59e0b; color: #451a03; box-shadow: 0 3px 0 #b45309; }
+    .btn-close:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+  <div class="main-wrapper">
+    <!-- PIRATE SLOGAN BANNER -->
+    <div class="slogan-capsule">
+      <span>☠️</span>
+      <span class="slogan-text" id="sloganBanner">"DEAD MEN TELL NO TALES!"</span>
+      <span>🕯️</span>
+    </div>
+
+    <header>
+      <h1>CAPTAIN DARK'S GHOST FLEET</h1>
+      <div class="sub-bar">
+        <div class="stat-pill">🧭 Waypoints: <span id="progressText" style="color:var(--gold)">0 / 24</span></div>
+        <div class="stat-pill" style="cursor:pointer;" onclick="resetProgress()">🔄 Reset Voyage</div>
+      </div>
+    </header>
+
+    <!-- CENTERED POSTER FRAME -->
+    <div class="stamp-container">
+      <div class="map-frame" id="mapZone">
+        
+        <!-- SVG ARTWORK -->
+        <svg class="art-canvas" viewBox="0 0 1000 1000">
+          <defs>
+            <filter id="shadowFilter" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="#050a12" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+
+          <!-- WATER GLOW DETAILS & WAVES -->
+          <g class="water-ripple" stroke="#38bdf8" stroke-width="3" stroke-linecap="round">
+            <path d="M 450,130 Q 470,120 490,130 M 470,140 Q 490,130 510,140" fill="none"/>
+            <path d="M 90,330 Q 110,320 130,330 M 110,340 Q 130,330 150,340" fill="none"/>
+            <path d="M 520,630 Q 540,620 560,630 M 540,640 Q 560,630 580,640" fill="none"/>
+          </g>
+
+          <!-- 1. BANNER TITLE (Top Center) -->
+          <g transform="translate(500, 110)">
+            <path d="M -170,-30 Q 0,-50 170,-30 L 160,25 Q 0,45 -160,25 Z" fill="#b45309" stroke="#78350f" stroke-width="3"/>
+            <polygon points="-165,-30 -185,-5 -160,25 -145,-2" fill="#92400e"/>
+            <polygon points="165,-30 185,-5 160,25 145,-2" fill="#92400e"/>
+            <circle cx="0" cy="-38" r="18" fill="#fde047" stroke="#000" stroke-width="2"/>
+            <path d="M -16,-44 Q 0,-62 16,-44 Z" fill="#dc2626"/>
+            <circle cx="4" cy="-38" r="4" fill="#000"/>
+            <text x="0" y="0" font-family="'Fredoka One', cursive" font-size="20" text-anchor="middle" fill="#fef3c7">CAPTAIN DARK'S</text>
+            <text x="0" y="22" font-family="'Fredoka One', cursive" font-size="26" text-anchor="middle" fill="#18181b">TWILIGHT CHART</text>
+          </g>
+
+          <!-- 2. OCCULT COMPASS (Top Left) -->
+          <g transform="translate(90, 95)">
+            <line x1="0" y1="-38" x2="0" y2="38" stroke="#000" stroke-width="2.5"/>
+            <line x1="-38" y1="0" x2="38" y2="0" stroke="#000" stroke-width="2.5"/>
+            <polygon points="0,-35 4,-6 0,0 -4,-6" fill="#e11d48"/>
+            <polygon points="0,35 4,6 0,0 -4,6" fill="#000"/>
+            <polygon points="35,0 6,4 0,0 6,-4" fill="#000"/>
+            <polygon points="-35,0 -6,4 0,0 -6,-4" fill="#000"/>
+            <text x="0" y="-42" font-family="'Fredoka One', cursive" font-size="22" text-anchor="middle" fill="#e11d48">N</text>
+            <text x="0" y="58" font-family="'Fredoka One', cursive" font-size="18" text-anchor="middle" fill="#cbd5e1">S</text>
+            <text x="48" y="6" font-family="'Fredoka One', cursive" font-size="18" text-anchor="middle" fill="#cbd5e1">E</text>
+            <text x="-48" y="6" font-family="'Fredoka One', cursive" font-size="18" text-anchor="middle" fill="#cbd5e1">W</text>
+          </g>
+
+          <!-- 3. ANIMATED GHOST SHIP (Top Left) -->
+          <g class="galleon-bob" transform="translate(60, 160)" filter="url(#shadowFilter)">
+            <path d="M 0,165 Q 40,150 80,165 Q 120,150 160,165 Q 200,150 240,165 Q 270,150 300,165" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+            <path d="M 15,90 L 260,90 C 240,155 50,155 15,90 Z" fill="#92400e" stroke="#1c1917" stroke-width="5"/>
+            <path d="M 10,90 L 265,90 L 260,105 L 12,105 Z" fill="#1e3a8a" stroke="#1c1917" stroke-width="3"/>
+            <circle cx="70" cy="125" r="7" fill="#fef08a" stroke="#1c1917" stroke-width="2"/>
+            <circle cx="120" cy="125" r="7" fill="#fef08a" stroke="#1c1917" stroke-width="2"/>
+            <circle cx="170" cy="125" r="7" fill="#fef08a" stroke="#1c1917" stroke-width="2"/>
+            <path d="M 90,85 Q 160,30 180,85 L 180,-10 Q 130,-30 90,-10 Z" fill="#f8fafc" stroke="#1c1917" stroke-width="4"/>
+            <circle cx="140" cy="30" r="10" fill="#000"/>
+            <circle cx="45" cy="70" r="12" fill="#2dd4bf" stroke="#042f2e" stroke-width="2.5" filter="drop-shadow(0 0 6px #2dd4bf)"/>
+            <circle cx="215" cy="70" r="12" fill="#2dd4bf" stroke="#042f2e" stroke-width="2.5" filter="drop-shadow(0 0 6px #2dd4bf)"/>
+          </g>
+
+          <!-- 4. ANIMATED WHALES -->
+          <g class="whale-swim" transform="translate(680, 240)">
+            <ellipse cx="40" cy="40" rx="35" ry="24" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+            <path d="M 70,40 Q 95,25 90,15 Q 75,30 65,35 Z" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+            <circle cx="25" cy="35" r="4" fill="#000"/>
+            <path d="M 35,16 Q 30,-5 20,-10 M 35,16 Q 40,-5 50,-10" stroke="#bae6fd" stroke-width="3" fill="none"/>
+          </g>
+
+          <!-- 5. RUM RUNNER ISLE -->
+          <g transform="translate(430, 240)" filter="url(#shadowFilter)">
+            <path d="M 20,130 C 70,80 200,80 230,135 C 250,175 180,210 110,205 C 40,200 0,170 20,130 Z" fill="#334155"/>
+            <path d="M 30,135 C 75,95 190,95 218,140 C 235,170 170,195 110,192 C 50,188 15,165 30,135 Z" fill="#d97706"/>
+            <path d="M 120,130 Q 115,70 95,45" stroke="#78350f" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <circle cx="85" cy="45" r="22" fill="#15803d"/>
+            <circle cx="110" cy="40" r="18" fill="#166534"/>
+            <circle cx="70" cy="55" r="16" fill="#166534"/>
+            <ellipse cx="110" cy="145" rx="14" ry="18" fill="#b45309" stroke="#292524" stroke-width="3"/>
+            <ellipse cx="132" cy="155" rx="16" ry="14" fill="#78350f" stroke="#292524" stroke-width="3"/>
+          </g>
+          <text x="540" y="475" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">RUM RUNNER ISLE</text>
+
+          <!-- 6. PIRATES COVE CLIFFS -->
+          <g transform="translate(710, 160)" filter="url(#shadowFilter)">
+            <path d="M 50,110 L 90,260 L 190,240 L 250,110 Z" fill="#ca8a04" stroke="#1c1917" stroke-width="3"/>
+            <path d="M 60,115 L 75,250 L 125,245 L 110,120 Z" fill="#a16207"/>
+            <path d="M 30,110 Q 150,60 260,110 Q 160,140 30,110 Z" fill="#15803d" stroke="#14532d" stroke-width="4"/>
+            <circle cx="85" cy="65" r="24" fill="#15803d"/>
+            <circle cx="190" cy="65" r="26" fill="#15803d"/>
+            <path d="M 120,230 L 245,230 C 230,270 145,270 120,230 Z" fill="#18181b" stroke="#000" stroke-width="3"/>
+            <line x1="160" y1="230" x2="160" y2="175" stroke="#000" stroke-width="3"/>
+            <line x1="205" y1="230" x2="205" y2="175" stroke="#000" stroke-width="3"/>
+            <path d="M 145,190 L 175,190 M 145,205 L 175,205" stroke="#fff" stroke-width="3"/>
+            <path d="M 190,190 L 220,190 M 190,205 L 220,205" stroke="#fff" stroke-width="3"/>
+          </g>
+          <text x="890" y="445" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">PIRATES COVE</text>
+
+          <!-- 7. SHARK REEF & BUZZARD BEACH (WITH TROPICAL RAIN ANIMATION) -->
+          <g transform="translate(380, 430)">
+            <path d="M 0,20 Q 10,0 20,0 Q 22,15 35,20 Z" fill="#0f172a"/>
+            <path d="M 30,40 Q 40,20 50,20 Q 52,35 65,40 Z" fill="#0f172a"/>
+            <text x="25" y="70" font-family="'Fredoka One', cursive" font-size="13" text-anchor="middle" fill="#93c5fd">SHARK REEF</text>
+          </g>
+          
+          <g transform="translate(230, 410)" filter="url(#shadowFilter)">
+            <path d="M 50,110 C 20,130 5,160 35,185 C 85,210 145,170 135,130 C 120,80 80,80 50,110 Z" fill="#ca8a04" stroke="#a16207" stroke-width="4"/>
+            <polygon points="75,80 95,145 65,145" fill="#78350f" stroke="#1c1917" stroke-width="3"/>
+            <circle cx="75" cy="74" r="7" fill="#000"/>
+            <polygon points="70,74 60,78 70,80" fill="#f59e0b"/>
+
+            <!-- Storm Rain Cloud over Buzzard Beach -->
+            <g transform="translate(25, 40)" opacity="0.85">
+              <ellipse cx="45" cy="20" rx="35" ry="16" fill="#334155"/>
+              <ellipse cx="60" cy="14" rx="25" ry="18" fill="#475569"/>
+              <ellipse cx="30" cy="18" rx="20" ry="14" fill="#475569"/>
+            </g>
+
+            <!-- Animated Rain Drops -->
+            <g class="rain-layer">
+              <line x1="45" y1="75" x2="35" y2="105"/>
+              <line x1="65" y1="70" x2="55" y2="100"/>
+              <line x1="85" y1="75" x2="75" y2="105"/>
+              <line x1="105" y1="70" x2="95" y2="100"/>
+              <line x1="55" y1="110" x2="45" y2="140"/>
+              <line x1="75" y1="105" x2="65" y2="135"/>
+              <line x1="95" y1="110" x2="85" y2="140"/>
+              <line x1="115" y1="105" x2="105" y2="135"/>
+              <line x1="35" y1="120" x2="25" y2="150"/>
+            </g>
+          </g>
+          <text x="315" y="615" font-family="'Fredoka One', cursive" font-size="14" text-anchor="middle" fill="#f8fafc">BUZZARD BEACH 🌧️</text>
+
+          <!-- 8. ROCK RUN SPIRES -->
+          <g transform="translate(530, 460)">
+            <ellipse cx="40" cy="90" rx="26" ry="14" fill="#57534e" stroke="#1c1917" stroke-width="3"/>
+            <ellipse cx="40" cy="72" rx="20" ry="11" fill="#78716c" stroke="#1c1917" stroke-width="3"/>
+            <ellipse cx="40" cy="56" rx="14" ry="8" fill="#a8a29e" stroke="#1c1917" stroke-width="3"/>
+
+            <ellipse cx="90" cy="110" rx="30" ry="16" fill="#57534e" stroke="#1c1917" stroke-width="3"/>
+            <ellipse cx="90" cy="90" rx="22" ry="12" fill="#78716c" stroke="#1c1917" stroke-width="3"/>
+            <ellipse cx="90" cy="72" rx="15" ry="9" fill="#a8a29e" stroke="#1c1917" stroke-width="3"/>
+
+            <ellipse cx="140" cy="130" rx="28" ry="15" fill="#57534e" stroke="#1c1917" stroke-width="3"/>
+            <ellipse cx="200" cy="85" rx="32" ry="16" fill="#57534e" stroke="#1c1917" stroke-width="3"/>
+            <text x="130" y="80" transform="rotate(-20 130 80)" font-family="'Fredoka One', cursive" font-size="15" fill="#f8fafc">ROCK RUN</text>
+          </g>
+
+          <!-- 9. MONKEY BUSINESS ISLAND & ALLIGATOR ALLEY -->
+          <g transform="translate(-10, 420)" filter="url(#shadowFilter)">
+            <path d="M 0,20 C 120,40 210,140 180,290 C 160,370 70,400 0,380 Z" fill="#334155"/>
+            <path d="M 0,35 C 105,55 190,145 165,280 C 145,355 60,380 0,365 Z" fill="#15803d" stroke="#14532d" stroke-width="4"/>
+            <path d="M 60,180 Q 95,90 145,100" stroke="#78350f" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <circle cx="145" cy="90" r="28" fill="#166534"/>
+            <circle cx="65" cy="230" r="32" fill="#166534"/>
+            <circle cx="45" cy="310" r="35" fill="#166534"/>
+            <circle cx="75" cy="130" r="9" fill="#451a03"/>
+            <circle cx="170" cy="265" r="9" fill="#451a03"/>
+          </g>
+          <text x="110" y="810" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">MONKEY BUSINESS</text>
+          <text x="110" y="828" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">ISLAND</text>
+
+          <g transform="translate(230, 680)">
+            <path d="M 0,0 Q 15,-10 30,0 Q 15,5 0,0" fill="#166534"/>
+            <circle cx="12" cy="-4" r="2" fill="#000"/>
+            <path d="M 35,40 Q 50,30 65,40 Q 50,45 35,40" fill="#166534"/>
+            <circle cx="47" cy="36" r="2" fill="#000"/>
+            <text x="40" y="70" transform="rotate(35 40 70)" font-family="'Fredoka One', cursive" font-size="14" fill="#93c5fd">ALLIGATOR ALLEY</text>
+          </g>
+
+          <!-- 10. ANIMATED LAVA ROCK VOLCANO (WITH FLOATING LAVA) -->
+          <g transform="translate(410, 600)" filter="url(#shadowFilter)">
+            <path d="M 20,130 C 60,95 190,95 230,135 C 240,180 170,210 110,205 C 50,200 0,170 20,130 Z" fill="#d97706"/>
+            <polygon points="125,50 185,165 65,165" fill="#44403c" stroke="#1c1917" stroke-width="4"/>
+            
+            <!-- Flowing Base Lava Streams -->
+            <path class="floating-lava-stream" d="M 125,50 L 105,100 L 115,140 L 135,100 Z" fill="#ef4444"/>
+            <path class="floating-lava-stream" d="M 125,50 L 145,95 L 140,135 L 130,95 Z" fill="#ff793f"/>
+
+            <!-- Floating & Bubbling Lava Droplets -->
+            <g class="floating-lava-blob1">
+              <circle cx="125" cy="45" r="9" fill="#ff3838"/>
+              <circle cx="118" cy="42" r="5" fill="#ffd32a"/>
+              <circle cx="108" cy="80" r="6" fill="#ff4757"/>
+            </g>
+            <g class="floating-lava-blob2">
+              <circle cx="132" cy="48" r="8" fill="#ff9f43"/>
+              <circle cx="130" cy="46" r="4.5" fill="#fff200"/>
+              <circle cx="140" cy="88" r="7" fill="#ff3838"/>
+            </g>
+          </g>
+          <text x="535" y="828" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">LAVA ROCK 🌋</text>
+
+          <!-- 11. TREASURE ISLAND & CHEST -->
+          <g transform="translate(680, 560)" filter="url(#shadowFilter)">
+            <path d="M 30,140 C 100,75 280,75 305,145 C 315,200 230,250 140,240 C 50,230 0,190 30,140 Z" fill="#475569"/>
+            <path d="M 45,145 C 110,90 265,90 288,150 C 295,190 220,230 140,225 C 60,220 20,185 45,145 Z" fill="#d97706"/>
+            <path d="M 130,150 Q 110,60 80,45" stroke="#78350f" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M 210,150 Q 230,70 260,50" stroke="#78350f" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <circle cx="70" cy="45" r="26" fill="#15803d"/>
+            <circle cx="120" cy="55" r="22" fill="#166534"/>
+            <circle cx="270" cy="50" r="26" fill="#15803d"/>
+            <circle cx="220" cy="60" r="22" fill="#166534"/>
+            <rect x="70" y="150" width="45" height="35" rx="6" fill="#b45309" stroke="#000" stroke-width="3"/>
+            <path d="M 66,150 Q 92,130 118,150 Z" fill="#f59e0b" stroke="#000" stroke-width="3"/>
+            <circle cx="92" cy="165" r="5" fill="#fde047" filter="drop-shadow(0 0 6px #fde047)"/>
+            <line x1="160" y1="175" x2="160" y2="105" stroke="#000" stroke-width="4"/>
+            <rect x="160" y="105" width="40" height="28" fill="#fff" stroke="#000" stroke-width="2"/>
+            <text x="180" y="125" font-family="'Fredoka One', cursive" font-size="18" text-anchor="middle" fill="#dc2626">✖</text>
+          </g>
+          <text x="830" y="828" font-family="'Fredoka One', cursive" font-size="15" text-anchor="middle" fill="#f8fafc">TREASURE ISLAND</text>
+
+          <!-- 12. WINDING 24-WAYPOINT DASHED ROADMAP TRAIL -->
+          <path id="treasureDottedTrail" d="
+            M 330,370 L 390,360 L 450,340 L 515,310 L 585,305 L 650,335 
+            L 700,380 L 735,420 L 730,470 L 685,505 L 635,535 L 580,560 
+            L 520,580 L 440,560 L 395,595 L 420,685 L 485,735 L 560,740 
+            L 620,705 L 680,695 L 740,700 L 780,660 L 810,680 L 840,720
+          " fill="none" stroke="#f8fafc" stroke-width="4.5" stroke-dasharray="8 8" stroke-linecap="round" opacity="0.65"/>
+        </svg>
+
+        <!-- FLOATING GHOST SHIP AVATAR GUIDE -->
+        <div id="ghostAvatar">
+          <svg viewBox="0 0 64 64" width="100%" height="100%">
+            <path d="M 8,38 L 56,38 C 50,56 14,56 8,38 Z" fill="#00ffc4" stroke="#042f2e" stroke-width="3"/>
+            <line x1="32" y1="38" x2="32" y2="8" stroke="#042f2e" stroke-width="3"/>
+            <path d="M 32,12 Q 52,20 32,30 Q 52,36 32,38" fill="#a7f3d0" stroke="#042f2e" stroke-width="2.5"/>
+            <circle cx="24" cy="45" r="3" fill="#fff"/>
+            <circle cx="40" cy="45" r="3" fill="#fff"/>
+          </svg>
+        </div>
+
+        <!-- 24 ROADMAP BUTTONS GENERATED BY JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP CARD FOR CLUES (READ-ONLY) -->
+  <div class="modal-overlay" id="cluePopup">
+    <div class="storybook-card">
+      <div class="tag-bubble" id="stepTag">WAYPOINT 1</div>
+      <h2 class="card-title" id="stepTitle">The Ghost Galleon's Wake</h2>
+      
+      <div class="card-clue-box" id="stepClueText">
+        <!-- Clue text inserted dynamically -->
+      </div>
+
+      <div class="btn-wrap">
+        <button class="btn-act btn-done" id="markBtn" onclick="toggleCompleted()">Mark Found ✔</button>
+        <button class="btn-act btn-close" onclick="closeClue()">Close Map</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Slogans Rotator
+    const slogans = [
+      `"DEAD MEN TELL NO TALES!"`,
+      `"SAIL WITH THE GHOST FLEET AT TWILIGHT!"`,
+      `"NOT ALL TREASURE IS SILVER & GOLD!"`,
+      `"SEIZE THE TIDES, CLAIM THE FINAL CHEST!"`
+    ];
+    let sloganIdx = 0;
+    setInterval(() => {
+      sloganIdx = (sloganIdx + 1) % slogans.length;
+      document.getElementById('sloganBanner').textContent = `"${slogans[sloganIdx]}"`;
+    }, 4000);
+
+    // =========================================================
+    // 🗺️ 24 WAYPOINTS & HARDCODED CLUES
+    // =========================================================
+    const waypoints = [
+      { id: 1,  x: 33.0, y: 37.0, name: "The Ghost Galleon's Wake", clue: "dedbaratek" },
+      { id: 2,  x: 39.0, y: 36.0, name: "Sea Sprayer Shoals", clue: "Add your Clue #2 description here." },
+      { id: 3,  x: 45.0, y: 34.0, name: "Whale Song Passage", clue: "Add your Clue #3 description here." },
+      { id: 4,  x: 51.5, y: 31.0, name: "Rum Runner North Shore", clue: "Add your Clue #4 description here." },
+      { id: 5,  x: 58.5, y: 30.5, name: "Palm Shade Haven", clue: "Add your Clue #5 description here." },
+      { id: 6,  x: 65.0, y: 33.5, name: "Barrel Beach", clue: "Add your Clue #6 description here." },
+      { id: 7,  x: 70.0, y: 38.0, name: "Pirates Cove Lookout", clue: "Add your Clue #7 description here." },
+      { id: 8,  x: 73.5, y: 42.0, name: "Smuggler's Mooring", clue: "Add your Clue #8 description here." },
+      { id: 9,  x: 73.0, y: 47.0, name: "Top Spires Ridge", clue: "Add your Clue #9 description here." },
+      { id: 10, x: 68.5, y: 50.5, name: "Rock Run High Pass", clue: "Add your Clue #10 description here." },
+      { id: 11, x: 63.5, y: 53.5, name: "Pebble Point", clue: "Add your Clue #11 description here." },
+      { id: 12, x: 58.0, y: 56.0, name: "Shark Fin Trench", clue: "Add your Clue #12 description here." },
+      { id: 13, x: 52.0, y: 58.0, name: "Buzzard Overlook", clue: "Add your Clue #13 description here." },
+      { id: 14, x: 44.0, y: 56.0, name: "Monkey Bay Crossing", clue: "Add your Clue #14 description here." },
+      { id: 15, x: 39.5, y: 59.5, name: "Jungle Fringe Creek", clue: "Add your Clue #15 description here." },
+      { id: 16, x: 42.0, y: 68.5, name: "Alligator Snout Bank", clue: "Add your Clue #16 description here." },
+      { id: 17, x: 48.5, y: 73.5, name: "Volcano Base Camp", clue: "Add your Clue #17 description here." },
+      { id: 18, x: 56.0, y: 74.0, name: "Brimstone Trail", clue: "Add your Clue #18 description here." },
+      { id: 19, x: 62.0, y: 70.5, name: "Smoldering Rocks", clue: "Add your Clue #19 description here." },
+      { id: 20, x: 68.0, y: 69.5, name: "Tide Pool Straits", clue: "Add your Clue #20 description here." },
+      { id: 21, x: 74.0, y: 70.0, name: "Bone Key Gate", clue: "Add your Clue #21 description here." },
+      { id: 22, x: 78.0, y: 66.0, name: "Treasure Coast Sands", clue: "Add your Clue #22 description here." },
+      { id: 23, x: 81.0, y: 68.0, name: "Crossbones Flagstaff", clue: "Add your Clue #23 description here." },
+      { id: 24, x: 84.0, y: 72.0, name: "The Captain's Chest (X)", clue: "🏆 THE ULTIMATE TREASURE! You have charted all 24 waypoints and freed the Ghost Fleet!" }
+    ];
+
+    let visitedWaypoints = JSON.parse(localStorage.getItem('twilight_map_progress')) || [];
+    let activeWp = null;
+
+    const mapZone = document.getElementById('mapZone');
+    const ghostAvatar = document.getElementById('ghostAvatar');
+    const popup = document.getElementById('cluePopup');
+    const stepTag = document.getElementById('stepTag');
+    const stepTitle = document.getElementById('stepTitle');
+    const stepClueText = document.getElementById('stepClueText');
+    const markBtn = document.getElementById('markBtn');
+    const progressText = document.getElementById('progressText');
+
+    function renderPins() {
+      document.querySelectorAll('.waypoint-pin').forEach(el => el.remove());
+
+      const currentUnlockedId = visitedWaypoints.length + 1;
+
+      waypoints.forEach(wp => {
+        const pin = document.createElement('button');
+        const isFinal = wp.id === 24;
+        const isVisited = visitedWaypoints.includes(wp.id);
+        const isUnlockedCurrent = (wp.id === currentUnlockedId);
+        const isLocked = wp.id > currentUnlockedId;
+
+        pin.className = `waypoint-pin ${isFinal ? 'final-spot' : ''} ${isVisited ? 'visited' : ''} ${isUnlockedCurrent ? 'unlocked-current' : ''} ${isLocked ? 'locked' : ''}`;
+        pin.style.left = `${wp.x}%`;
+        pin.style.top = `${wp.y}%`;
+
+        if (isLocked) {
+          pin.innerHTML = '🔒';
+          pin.title = `Locked - Complete Waypoint #${wp.id - 1} first!`;
+        } else if (isFinal && isVisited) {
+          pin.innerHTML = '👑';
+          pin.title = wp.name;
+        } else if (isFinal) {
+          pin.innerHTML = '☠️';
+          pin.title = wp.name;
+        } else if (isVisited) {
+          pin.innerHTML = '✔';
+          pin.title = wp.name;
+        } else {
+          pin.innerHTML = wp.id;
+          pin.title = wp.name;
+        }
+
+        if (!isLocked) {
+          pin.onclick = () => openClue(wp);
+        }
+
+        mapZone.appendChild(pin);
+      });
+
+      progressText.textContent = `${visitedWaypoints.length} / 24`;
+      
+      const targetNode = waypoints.find(w => w.id === currentUnlockedId) || waypoints[23];
+      moveGhost(targetNode);
+    }
+
+    function moveGhost(wp) {
+      if (!wp) return;
+      ghostAvatar.style.left = `${wp.x}%`;
+      ghostAvatar.style.top = `${wp.y}%`;
+    }
+
+    function openClue(wp) {
+      activeWp = wp;
+      moveGhost(wp);
+
+      stepTag.textContent = `WAYPOINT #${wp.id} OF 24`;
+      stepTitle.textContent = wp.name;
+      stepClueText.textContent = wp.clue || "No clue text inscribed here yet...";
+
+      const isDone = visitedWaypoints.includes(wp.id);
+      markBtn.textContent = isDone ? "Found ✔" : "Mark Found ✔";
+      markBtn.style.opacity = isDone ? "0.65" : "1.0";
+
+      popup.classList.add('active');
+
+      if (wp.id === 24 && isDone) {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      }
+    }
+
+    function toggleCompleted() {
+      if (!activeWp) return;
+      if (!visitedWaypoints.includes(activeWp.id)) {
+        visitedWaypoints.push(activeWp.id);
+        localStorage.setItem('twilight_map_progress', JSON.stringify(visitedWaypoints));
+        
+        if (activeWp.id === 24) {
+          confetti({ particleCount: 140, spread: 85, origin: { y: 0.6 } });
+        } else {
+          confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+        }
+      }
+      renderPins();
+      closeClue();
+    }
+
+    function closeClue() {
+      popup.classList.remove('active');
+    }
+
+    function resetProgress() {
+      if (confirm("Reset voyage back to Waypoint #1?")) {
+        visitedWaypoints = [];
+        localStorage.removeItem('twilight_map_progress');
+        renderPins();
+      }
+    }
+
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) closeClue();
+    });
+
+    renderPins();
+  </script>
+</body>
+</html>
